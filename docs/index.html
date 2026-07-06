@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>hrpq-gap-scan | Chromium HRPQ post-quantum downgrade gap scanner</title>
+<meta name="description" content="Audits a domain and its subdomains for the HRPQ / cookie-scoping post-quantum downgrade gap in Chromium's Post-Quantum HTTPS Authentication Roadmap." />
+<meta property="og:title" content="hrpq-gap-scan" />
+<meta property="og:description" content="Finds the gap between HRPQ's per-origin PQ guarantee and the per-domain cookie model it can't fully cover, before an incident finds it for you." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sunilgentyala.github.io/hrpq-gap-scan/" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="hrpq-gap-scan" />
+<meta name="twitter:description" content="A CLI that audits domains for the HRPQ / cookie-scoping post-quantum downgrade gap." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="favicon.svg" alt="" />
+      hrpq-gap-scan
+    </div>
+    <div class="nav-links">
+      <a href="#gap">The gap</a>
+      <a href="#findings">Findings</a>
+      <a href="#usage">Usage</a>
+      <a href="https://github.com/sunilgentyala/hrpq-gap-scan" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="container">
+    <div class="badge">&#9889; Chromium Post-Quantum HTTPS Authentication Roadmap</div>
+    <h1>The <span class="grad">HRPQ downgrade gap</span><br>lives between the origin and the cookie jar.</h1>
+    <p class="subtitle">
+      HRPQ lets one origin require post-quantum TLS. Cookies don't stop at the origin,
+      they're scoped to the whole registrable domain. <code>hrpq-gap-scan</code> finds
+      the sibling subdomains, missing headers, and enterprise TLS proxies that turn
+      that mismatch into a real downgrade path, before an incident finds it for you.
+    </p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#usage">See it run</a>
+      <a class="btn btn-ghost" href="https://github.com/sunilgentyala/hrpq-gap-scan" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<section id="gap">
+  <div class="container">
+    <h2>Three ways the model breaks</h2>
+    <div class="gap-grid">
+      <div class="card">
+        <h3>Cookie scoping ignores HRPQ</h3>
+        <p>A domain-scoped cookie set by a PQ-protected origin is still readable by,
+        and overwritable by, any PQ-insecure sibling on the same registrable domain.
+        Protecting one origin doesn't protect that origin's session state.</p>
+      </div>
+      <div class="card">
+        <h3><code>includeSubDomains</code> is all-or-nothing</h3>
+        <p>Set it, and any subdomain that isn't PQ hybrid-capable hard-fails once
+        HRPQ is enforced, no silent classical fallback. Leave it off, and the
+        cookie-injection gap above stays open.</p>
+      </div>
+      <div class="card">
+        <h3>Enterprise TLS proxies are invisible</h3>
+        <p>A proxy that terminates and re-originates TLS is its own migration target.
+        Clients roaming between a proxied and unproxied network see connections fail
+        and recover with no obvious explanation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="findings">
+  <div class="container">
+    <h2>What it reports</h2>
+    <table>
+      <thead>
+        <tr><th>Finding</th><th>Severity</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>hrpq-missing-includesubdomains</code></td>
+          <td><span class="sev sev-high">HIGH</span></td>
+          <td>HRPQ set without <code>includeSubDomains</code>; siblings can still inject cookies into this origin's session state.</td>
+        </tr>
+        <tr>
+          <td><code>includesubdomains-breaks-subdomain</code></td>
+          <td><span class="sev sev-high">HIGH</span></td>
+          <td><code>includeSubDomains</code> set, but a subdomain isn't PQ-capable and will hard-fail once HRPQ is enforced.</td>
+        </tr>
+        <tr>
+          <td><code>cookie-injection-exposure</code></td>
+          <td><span class="sev sev-high">HIGH</span></td>
+          <td>A domain-scoped cookie from a PQ-capable host is exposed to a non-PQ-capable sibling.</td>
+        </tr>
+        <tr>
+          <td><code>proxy-downgrade-vector</code></td>
+          <td><span class="sev sev-high">HIGH</span></td>
+          <td>A host negotiates PQ hybrid directly but not through an enterprise proxy path (via <code>diff</code>).</td>
+        </tr>
+        <tr>
+          <td><code>no-pq-hybrid</code></td>
+          <td><span class="sev sev-medium">MEDIUM</span></td>
+          <td>Host negotiated a classical group; a downgrade pivot point until upgraded.</td>
+        </tr>
+        <tr>
+          <td><code>unreachable</code></td>
+          <td><span class="sev sev-low">LOW</span></td>
+          <td>Host couldn't be probed; verify manually.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="usage">
+  <div class="container">
+    <h2>Usage</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="scan">scan</button>
+      <button class="tab-btn" data-tab="json">--json</button>
+      <button class="tab-btn" data-tab="diff">diff</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-scan">
+<pre><code>$ hrpq-gap-scan scan example.com --subdomains app.example.com legacy.example.com
+
+hrpq-gap-scan report for example.com
+============================================================
+  example.com: X25519MLKEM768 [PQ hybrid]  max-age=31536000; includeSubDomains
+  app.example.com: X25519MLKEM768 [PQ hybrid]  no HRPQ header
+  legacy.example.com: X25519 [classical]  no HRPQ header
+
+Findings (3):
+  [HIGH] legacy.example.com: example.com sets includeSubDomains, but
+         legacy.example.com does not negotiate a PQ hybrid group. Browsers
+         enforcing HRPQ have no silent classical fallback here.
+  [HIGH] example.com: Cookie 'session' is domain-scoped (Domain=.example.com)
+         and set by a PQ hybrid-capable host, but legacy.example.com on the
+         same registrable domain is not PQ hybrid-capable.
+  [MEDIUM] legacy.example.com: Negotiated group was 'X25519', a classical
+         group. This host is a viable downgrade pivot until upgraded.</code></pre>
+    </div>
+
+    <div class="tab-panel" id="tab-json">
+<pre><code>$ hrpq-gap-scan scan example.com --subdomains-file subdomains.txt --json
+
+{
+  "apex": "example.com",
+  "hosts": { "...": "..." },
+  "findings": [
+    {
+      "severity": "high",
+      "kind": "cookie-injection-exposure",
+      "host": "example.com",
+      "detail": "Cookie 'session' is domain-scoped (Domain=.example.com) ..."
+    }
+  ]
+}</code></pre>
+    </div>
+
+    <div class="tab-panel" id="tab-diff">
+<pre><code>$ hrpq-gap-scan scan example.com --json > direct.json      # outside the proxy
+$ hrpq-gap-scan scan example.com --json > via_proxy.json   # inside the proxied network
+$ hrpq-gap-scan diff direct.json via_proxy.json
+
+Proxy vantage-point differences (1):
+  [HIGH] app.example.com: app.example.com negotiates a PQ hybrid group
+         directly but the proxied path resolves to 'X25519'. The
+         TLS-inspecting proxy on this network path is the actual downgrade
+         vector, not the origin server.</code></pre>
+    </div>
+
+    <p style="margin-top:28px;">
+      <code>pip install -e .</code> from a clone of the repo. Requires OpenSSL 3.2+
+      on <code>PATH</code>. Full walkthrough and sample output in
+      <a href="https://github.com/sunilgentyala/hrpq-gap-scan/tree/main/examples" target="_blank" rel="noopener">examples/</a>.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="author-line">
+      <strong>Sunil Gentyala</strong> &mdash; cybersecurity architect and researcher,
+      IEEE Senior Member, HCLTech's expert representative to the Cloud Security Alliance.
+    </div>
+    <p style="margin-top:14px;">
+      MIT licensed. <a href="https://github.com/sunilgentyala/hrpq-gap-scan" target="_blank" rel="noopener">Source on GitHub</a> &middot;
+      <a href="https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/" target="_blank" rel="noopener">Chromium's Post-Quantum HTTPS Authentication Roadmap</a>
+    </p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

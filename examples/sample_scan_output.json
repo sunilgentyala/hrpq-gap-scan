@@ -1,0 +1,52 @@
+{
+  "apex": "example.com",
+  "hosts": {
+    "example.com": {
+      "host": "example.com",
+      "reachable": true,
+      "negotiated_group": "X25519MLKEM768",
+      "pq_hybrid": true,
+      "hrpq_header": "max-age=31536000; includeSubDomains",
+      "include_subdomains": true,
+      "error": null,
+      "cookies": [
+        {
+          "name": "session",
+          "domain_attr": ".example.com",
+          "secure": true,
+          "http_only": true
+        }
+      ]
+    },
+    "legacy.example.com": {
+      "host": "legacy.example.com",
+      "reachable": true,
+      "negotiated_group": "X25519",
+      "pq_hybrid": false,
+      "hrpq_header": null,
+      "include_subdomains": false,
+      "error": null,
+      "cookies": []
+    }
+  },
+  "findings": [
+    {
+      "severity": "high",
+      "kind": "includesubdomains-breaks-subdomain",
+      "host": "legacy.example.com",
+      "detail": "example.com sets includeSubDomains, but legacy.example.com does not negotiate a PQ hybrid group. Browsers enforcing HRPQ have no silent classical fallback here: connections to this host will hard-fail rather than downgrade quietly."
+    },
+    {
+      "severity": "high",
+      "kind": "cookie-injection-exposure",
+      "host": "example.com",
+      "detail": "Cookie 'session' is domain-scoped (Domain=.example.com) and set by a PQ hybrid-capable host, but legacy.example.com on the same registrable domain is not PQ hybrid-capable. A downgrade attacker who reaches that sibling can inject or overwrite this cookie regardless of example.com's own cryptography."
+    },
+    {
+      "severity": "medium",
+      "kind": "no-pq-hybrid",
+      "host": "legacy.example.com",
+      "detail": "Negotiated group was 'X25519', a classical group. This host is a viable downgrade pivot until it supports a PQ hybrid key agreement."
+    }
+  ]
+}

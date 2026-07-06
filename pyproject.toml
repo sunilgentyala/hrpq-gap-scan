@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hrpq-gap-scan"
+version = "0.1.0"
+description = "Audits a domain and its subdomains for the HRPQ / cookie-scoping post-quantum downgrade gap in Chromium's Post-Quantum HTTPS Authentication Roadmap."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Sunil Gentyala" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Security",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+[project.scripts]
+hrpq-gap-scan = "hrpq_gap_scan.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+Homepage = "https://sunilgentyala.github.io/hrpq-gap-scan/"
+Repository = "https://github.com/sunilgentyala/hrpq-gap-scan"
