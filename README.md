@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](pyproject.toml)
 [![Site](https://img.shields.io/badge/site-sunilgentyala.github.io%2Fhrpq--gap--scan-0b5fff.svg)](https://sunilgentyala.github.io/hrpq-gap-scan/)
+[![SC World](https://img.shields.io/badge/SC%20World-perspective%20piece-orange.svg)](https://www.scworld.com/perspective/post-quantum-https-migration-faces-enterprise-browser-challenges)
 
 **Audits a domain and its subdomains for the HRPQ / cookie-scoping post-quantum
 downgrade gap in Chromium's [Post-Quantum HTTPS Authentication
@@ -37,6 +38,13 @@ None of this is a defect in HRPQ as specified. It's a structural mismatch betwee
 per-origin security guarantee and a per-domain state model, and it's the kind of gap
 that's invisible until an incident forces you to find it. `hrpq-gap-scan` turns that
 gap into something you can check for before that happens.
+
+This toolkit is the operational companion to the SC World perspective piece
+["Post-quantum HTTPS migration faces enterprise browser
+challenges"](https://www.scworld.com/perspective/post-quantum-https-migration-faces-enterprise-browser-challenges)
+by Sunil Gentyala (July 2026), which lays out the same cookie-scoping,
+`includeSubDomains`, and enterprise-proxy gaps in narrative form for a
+practitioner audience.
 
 ## What it checks
 
