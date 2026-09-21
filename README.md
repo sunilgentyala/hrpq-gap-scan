@@ -121,6 +121,15 @@ pytest
 and HCLTech's expert representative to the Cloud Security Alliance, specializing in
 post-quantum, AI, and agentic-system security.
 
+## Docker (GitHub Packages)
+
+A prebuilt container image is published to the GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/sunilgentyala/hrpq-gap-scan:latest
+docker run --rm ghcr.io/sunilgentyala/hrpq-gap-scan scan example.com
+```
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
