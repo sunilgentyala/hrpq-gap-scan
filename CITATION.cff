@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: If you use this software in your research, please cite it as below.
+type: software
+title: hrpq-gap-scan
+authors:
+- family-names: Gentyala
+  given-names: Sunil
+  affiliation: HCLTech (HCL America Inc.), Dallas, TX, USA
+  orcid: https://orcid.org/0009-0005-2642-3479
+  email: sunil.gentyala@ieee.org
+repository-code: https://github.com/sunilgentyala/hrpq-gap-scan
+url: https://sunilgentyala.github.io/hrpq-gap-scan/
+license: MIT
+abstract: Audits a domain and its subdomains for the HRPQ / cookie-scoping post-quantum downgrade
+  gap in Chromium's Post-Quantum HTTPS Authentication Roadmap.
+keywords:
+- cryptography
+- postquantum
+- pqcrypto

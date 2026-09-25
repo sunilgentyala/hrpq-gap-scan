@@ -130,6 +130,21 @@ docker pull ghcr.io/sunilgentyala/hrpq-gap-scan:latest
 docker run --rm ghcr.io/sunilgentyala/hrpq-gap-scan scan example.com
 ```
 
+## How to Cite
+
+If you use hrpq-gap-scan in your research, please cite the software:
+
+```bibtex
+@software{gentyala2026hrpq,
+  author    = {Gentyala, Sunil},
+  title     = {hrpq-gap-scan},
+  year      = {2026},
+  url       = {https://github.com/sunilgentyala/hrpq-gap-scan}
+}
+```
+
+Machine-readable metadata is in [`CITATION.cff`](CITATION.cff); GitHub shows it under "Cite this repository".
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
